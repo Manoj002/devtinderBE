@@ -1,9 +1,0 @@
- - Create a repo
- - initialize the proj
- - node_modules, package.json, package-lock.json
- - install express
- - create a server
- - listen on port 7777
- - write request handlers => /test , /hello , /
- - Install nodemon globally, update scripts in package.json
- - difference between caret(^) and tilde(~)
