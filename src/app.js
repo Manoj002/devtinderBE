@@ -6,6 +6,80 @@ const app = express();
 
 app.use(express.json());
 
+app.put("/user", async (req, res) => {
+  const emailId = req.body.emailId;
+
+  try {
+    await User.findOneAndReplace({ emailId }, req.body);
+    res.send("User replaced");
+  } catch (err) {
+    res.status(400).send("Something went wrong");
+  }
+});
+
+app.patch("/user", async (req, res) => {
+  const userId = req.body.id;
+
+  try {
+    await User.findByIdAndUpdate(userId, req.body);
+    res.send("User updated successfully");
+  } catch (err) {
+    res.status(400).send("Something went wrong");
+  }
+});
+
+app.delete("/deleteByEmailId", async (req, res) => {
+  const userEmail = req.body.emailId;
+  try {
+    await User.deleteOne({ emailId: userEmail });
+    res.send("User is remomved from records");
+  } catch (err) {
+    res.status(400).send("Something went wrong");
+  }
+});
+
+app.delete("/user", async (req, res) => {
+  const userId = req.body.id;
+  try {
+    await User.findByIdAndDelete(userId);
+    res.send("User is deleted");
+  } catch (err) {
+    res.status(400).send("Something went wrong");
+  }
+});
+
+app.get("/feed", async (req, res) => {
+  try {
+    // find() takes a filter -> { field_name_in_document: value_from_req.body },
+    // when no filter is passed, returns all documents from the given collection to which the model belongs
+    const users = await User.find();
+    res.send(users);
+  } catch (err) {
+    res.status(400).send("Something went wrong");
+  }
+});
+
+app.get("/getUserById", async (req, res) => {
+  try {
+    const user = await User.findById(req.body.id);
+    res.send(user);
+  } catch (err) {
+    res.status(400).send("Something went wrong");
+  }
+});
+
+app.get("/user", async (req, res) => {
+  const userEmail = req.body.emailId;
+
+  try {
+    const user = await User.findOne({ emailId: userEmail });
+
+    res.send(user);
+  } catch (err) {
+    res.status(400).send("Something went wrong");
+  }
+});
+
 app.post("/signUp", async (req, res) => {
   // creating an instance of user model
   const user = new User(req.body);
@@ -26,7 +100,7 @@ app.post("/signUp", async (req, res) => {
 app.use("/", (err, req, res, next) => {
   if (err) {
     res
-      .status("500")
+      .status(500)
       .send("Some unexpected error occurred, please contact support team");
   }
 });

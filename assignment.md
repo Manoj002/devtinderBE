@@ -59,3 +59,22 @@
 - Difference between JS object and JSON
 - Add express.json() middleware
 - make signUp api dynamic to receive data from end user
+- API - GET user by emailId
+- API - FEED API | GET /feed -> get all users from DB
+- use .findOne() for duplicate emailIds, to find out which document is returned from DB
+- API -> get user by id
+- Create a DELETE user API
+- Difference between PATCH and PUT
+- create PATCH api to update a user
+- Explore mongoose documentation for model methods
+- Explore options for regular model methods
+- PATCH -> update user obj by emailId
+
+<!-- S2 EP 09 -->
+
+- Explore SchemaType options from Documentation
+- add required, unique, min, minLength, trim, lowercase validators in Schema
+- Add default
+- create custom validator function for gender
+- Improve DB schema - add appropriate validations on each field in schema
+- Add timestamps to user schema
