@@ -74,7 +74,11 @@
 
 - Explore SchemaType options from Documentation
 - add required, unique, min, minLength, trim, lowercase validators in Schema
-- Add default
+- Add DEFAULT
 - create custom validator function for gender
 - Improve DB schema - add appropriate validations on each field in schema
 - Add timestamps to user schema
+- Add API level validation on PATCH and POST reqeuest
+- DATA SANITIZATION - Adding API validation for each field
+- Install validator
+- Explore validator lib and use validators for all fields in schema

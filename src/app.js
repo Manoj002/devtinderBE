@@ -10,21 +10,51 @@ app.put("/user", async (req, res) => {
   const emailId = req.body.emailId;
 
   try {
-    await User.findOneAndReplace({ emailId }, req.body);
+    await User.findOneAndReplace({ emailId }, req.body, {
+      // create a new record, if any document with given unique identifier doesn't exits
+      // upsert: true,
+    });
     res.send("User replaced");
   } catch (err) {
     res.status(400).send("Something went wrong");
   }
 });
 
-app.patch("/user", async (req, res) => {
-  const userId = req.body.id;
+app.patch("/user/:userId", async (req, res) => {
+  const userId = req.params?.userId;
+
+  // API LEVEL VALIDATION - not allowing email to be updated after signup
+
+  const updateAllowedForFields = [
+    "photo",
+    "about",
+    "skills",
+    "password",
+    "lastname",
+    "gender",
+    // "emailId",
+  ];
+
+  const isUpdateApplicable = Object.keys(req.body).every((key) =>
+    updateAllowedForFields.includes(key)
+  );
 
   try {
-    await User.findByIdAndUpdate(userId, req.body);
+    if (!isUpdateApplicable) {
+      throw new Error("Sensitive field update not allowed");
+    }
+
+    if (req.body?.skills?.length > 10) {
+      throw new Error("Skills cannot be more than 10");
+    }
+
+    await User.findByIdAndUpdate({ _id: userId }, req.body, {
+      returnDocument: "after",
+      runValidators: true,
+    });
     res.send("User updated successfully");
   } catch (err) {
-    res.status(400).send("Something went wrong");
+    res.status(400).send("UPDATE FAILED: " + err.message);
   }
 });
 
@@ -90,9 +120,7 @@ app.post("/signUp", async (req, res) => {
 
     res.send("User added successfully!");
   } catch (err) {
-    res
-      .status("500")
-      .send("Some unexpected error occurred, please contact support team");
+    res.status(400).send(err.message);
   }
 });
 
