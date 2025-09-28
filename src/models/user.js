@@ -33,6 +33,11 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
+      validate(value) {
+        if (!validator.isStrongPassword(value)) {
+          throw new Error("Password is not strong");
+        }
+      },
       // passwordValidator() {},     // Add a password format custom validator
     },
     age: {
@@ -69,7 +74,7 @@ const userSchema = new mongoose.Schema(
       },
     },
     skills: {
-      type: [String],
+      type: [String], // default value stored by mongoose is empty array, even when value is not passed
       validate(value) {
         if (value.length > 10) {
           throw new Error("Skills cannot be more than 10");

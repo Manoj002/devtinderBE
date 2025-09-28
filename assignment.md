@@ -82,3 +82,18 @@
 - DATA SANITIZATION - Adding API validation for each field
 - Install validator
 - Explore validator lib and use validators for all fields in schema
+
+- **_---------NEVER TRUST req.body---------_**
+  - always have proper validation for each fields,
+  - structured format at schema level,
+  - validators at schema level,
+  - DB constraints, if any
+
+<!-- S2 EP 10 -->
+
+- Validate data in /signup api
+- install bcrypt package
+- create password hash using bcrypt.hash and save the user password encrypted
+- create login POST api
+- perform necessary validations for login, email present check, password valid check
+- Work on error message if crendetials are invalid

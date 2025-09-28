@@ -1,10 +1,40 @@
 const express = require("express");
+const bcrypt = require("bcrypt");
 const connectDB = require("./config/database");
 const User = require("./models/user");
+const { validateSignUpData } = require("./utils/validation");
 
 const app = express();
 
 app.use(express.json());
+
+app.post("/login", async (req, res) => {
+  const { emailId, password } = req.body;
+
+  if (!emailId || !password) {
+    throw new Error("Invalid Credentials");
+  }
+
+  try {
+    const user = await User.findOne({ emailId: emailId });
+
+    if (!user) {
+      throw new Error("Invalid credentials");
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    console.log({ user, isPasswordValid });
+
+    if (!isPasswordValid) {
+      throw new Error("Invalid credentials");
+    }
+
+    res.send("Login successful!!!");
+  } catch (err) {
+    res.status(400).send("ERROR: login failed, " + err.message);
+  }
+});
 
 app.put("/user", async (req, res) => {
   const emailId = req.body.emailId;
@@ -48,7 +78,13 @@ app.patch("/user/:userId", async (req, res) => {
       throw new Error("Skills cannot be more than 10");
     }
 
-    await User.findByIdAndUpdate({ _id: userId }, req.body, {
+    const updateFields = { ...req.body };
+
+    if (Object.keys(req.body).includes("password")) {
+      updateFields.password = await bcrypt.hash(req.body?.password, 10);
+    }
+
+    await User.findByIdAndUpdate({ _id: userId }, updateFields, {
       returnDocument: "after",
       runValidators: true,
     });
@@ -111,10 +147,19 @@ app.get("/user", async (req, res) => {
 });
 
 app.post("/signUp", async (req, res) => {
-  // creating an instance of user model
-  const user = new User(req.body);
+  // Before writing the user in DB, 2 things needs to be done mandatorily
+  // 1. Validation of Data
+
+  validateSignUpData(req);
+
+  // 2. Password encryption
+
+  const passwordHash = await bcrypt.hash(req.body?.password, 10);
 
   try {
+    // creating an instance of user model
+    const user = new User({ ...req.body, password: passwordHash });
+
     // this is an async operation and returns a PROMISE
     await user.save();
 
