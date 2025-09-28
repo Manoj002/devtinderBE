@@ -3,15 +3,34 @@ const bcrypt = require("bcrypt");
 const connectDB = require("./config/database");
 const User = require("./models/user");
 const { validateSignUpData } = require("./utils/validation");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
 
 const app = express();
 
 app.use(express.json());
+// Parses the cookie, so it is readable by code
+app.use(cookieParser());
+
+app.get("/profile", async (req, res) => {
+  const { token } = req.cookies;
+
+  try {
+    if (!token) throw new Error("Token is not present");
+    const decodedMessage = jwt.verify(token, "SECRET_KEY@USER_LOGIN");
+    const user = await User.findOne({ _id: decodedMessage._id });
+    if (!user) throw new Error("User not found!!!");
+    res.send(user);
+  } catch (err) {
+    res.status(400).send("PROFILE API FAILED: " + err.message);
+  }
+});
 
 app.post("/login", async (req, res) => {
   const { emailId, password } = req.body;
 
   if (!emailId || !password) {
+    // during login, always send a generic error message, to prevent information leaking. User might be an attacker.
     throw new Error("Invalid Credentials");
   }
 
@@ -24,11 +43,17 @@ app.post("/login", async (req, res) => {
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
-    console.log({ user, isPasswordValid });
-
     if (!isPasswordValid) {
       throw new Error("Invalid credentials");
     }
+
+    // Create a JWT token, if all checks above passed
+
+    const jwtToken = jwt.sign({ _id: user._id }, "SECRET_KEY@USER_LOGIN");
+
+    // Add the token to cookie and send it back to user
+
+    res.cookie("token", jwtToken);
 
     res.send("Login successful!!!");
   } catch (err) {

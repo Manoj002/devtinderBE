@@ -97,3 +97,10 @@
 - create login POST api
 - perform necessary validations for login, email present check, password valid check
 - Work on error message if crendetials are invalid
+
+- install cookie-parser
+- send dummy cookie to user
+- create GET /profile
+- install jsonwebtoken
+- Create JWT token in login api and wrap it inside cookie
+- read cookie inside /profile api and find the logged in user
