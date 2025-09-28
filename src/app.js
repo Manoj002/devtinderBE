@@ -4,6 +4,7 @@ const connectDB = require("./config/database");
 const User = require("./models/user");
 const { validateSignUpData } = require("./utils/validation");
 const cookieParser = require("cookie-parser");
+const { userAuth } = require("./middlewares/userAuthMiddleware");
 const jwt = require("jsonwebtoken");
 
 const app = express();
@@ -12,18 +13,8 @@ app.use(express.json());
 // Parses the cookie, so it is readable by code
 app.use(cookieParser());
 
-app.get("/profile", async (req, res) => {
-  const { token } = req.cookies;
-
-  try {
-    if (!token) throw new Error("Token is not present");
-    const decodedMessage = jwt.verify(token, "SECRET_KEY@USER_LOGIN");
-    const user = await User.findOne({ _id: decodedMessage._id });
-    if (!user) throw new Error("User not found!!!");
-    res.send(user);
-  } catch (err) {
-    res.status(400).send("PROFILE API FAILED: " + err.message);
-  }
+app.get("/profile", userAuth, async (req, res) => {
+  res.send(req.user);
 });
 
 app.post("/login", async (req, res) => {
@@ -49,11 +40,13 @@ app.post("/login", async (req, res) => {
 
     // Create a JWT token, if all checks above passed
 
-    const jwtToken = jwt.sign({ _id: user._id }, "SECRET_KEY@USER_LOGIN");
+    const jwtToken = jwt.sign({ _id: user._id }, "SECRET_KEY@USER_LOGIN", {
+      expiresIn: "7d",
+    });
 
     // Add the token to cookie and send it back to user
 
-    res.cookie("token", jwtToken);
+    res.cookie("token", jwtToken, { expires: new Date(Date.now() + 900000) });
 
     res.send("Login successful!!!");
   } catch (err) {
