@@ -1,30 +1,43 @@
+const validator = require("validator");
+
 const validateSignUpData = (req) => {
-  const keys = Object.keys(req.body);
-  if (!keys.length) {
-    throw new Error("Required fields are missing");
+  const { firstName, lastName, emailId, password } = req.body;
+
+  if (!firstName || !lastName) {
+    throw new Error("Enter a vaid first or last name");
+  } else if (!validator.isEmail(emailId)) {
+    throw new Error("Enter a valid Email ID");
+  } else if (!validator.isStrongPassword(password)) {
+    throw new Error("Enter a strong password");
   }
-  const allFields = [
+
+  // Add mandatory validations for remaining fields
+};
+
+const validateUpdateData = (req) => {
+  console.log(req.body);
+  const updateAllowedFields = [
     "firstName",
     "lastName",
-    "emailId",
-    "password",
     "age",
     "gender",
     "photo",
-    "about",
     "skills",
+    "about",
   ];
-  if (
-    !["firstName", "lastName", "emailId", "password"].every((k) =>
-      keys.includes(k)
-    )
-  ) {
-    throw new Error("Required fields are missing");
+
+  const isUpdateAllowed = Object.keys(req.body).every((k) =>
+    updateAllowedFields.includes(k)
+  );
+
+  if (!isUpdateAllowed) {
+    throw new Error("Sensitive field update not allowed");
   }
 
-  // Add all mandatory fields validation
+  return isUpdateAllowed;
 };
 
 module.exports = {
   validateSignUpData,
+  validateUpdateData,
 };
