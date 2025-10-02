@@ -12,12 +12,15 @@ app.use(cookieParser());
 const authRouter = require("./routes/auth");
 const profileRouter = require("./routes/profile");
 const userRouter = require("./routes/user");
+const connectionRouter = require("./routes/connectionRequests");
 
 app.use("/", authRouter);
 
 app.use("/", profileRouter);
 
 app.use("/", userRouter);
+
+app.use("/", connectionRouter);
 
 // Handling unpredicted errors with wildcard
 app.use("/", (err, req, res, next) => {

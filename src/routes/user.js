@@ -1,14 +1,95 @@
 const express = require("express");
-const User = require("../models/user");
-const bcrypt = require("bcrypt");
+const Connection = require("../models/connection");
+const { userAuth } = require("../middlewares/userAuthMiddleware");
+
+const USER_SAFE_FIELDS = [
+  "firstName",
+  "lastName",
+  "age",
+  "gender",
+  "photo",
+  "skills",
+  "about",
+];
 
 const userRouter = express.Router();
 
-userRouter.get("/user/feed", () => {});
+userRouter.get("/user/requests/received", userAuth, async (req, res) => {
+  try {
+    const loggedInUser = req.user;
 
-userRouter.patch("/user/connections", () => {});
+    const connectionRequests = await Connection.find({
+      toUserId: loggedInUser._id,
+      status: "interested",
+    });
 
-userRouter.patch("/user/requests", () => {});
+    if (!connectionRequests) {
+      return res.status(404).send("Connection request not found");
+    }
+
+    res.json({
+      message: "Connection requests fetched successfully",
+      data: connectionRequests,
+    });
+  } catch (err) {
+    res.status(400).send({ message: "ERROR: " + err.message });
+  }
+});
+
+userRouter.get("/user/requests/send", userAuth, async (req, res) => {
+  try {
+    const loggedInUser = req.user;
+
+    const connectionRequests = await Connection.find({
+      fromUserId: loggedInUser._id,
+      status: "interested",
+    });
+
+    if (!connectionRequests) {
+      return res.status(404).send("Connections not found");
+    }
+
+    res.json({
+      message: "Sent requests fetched successfully",
+      data: connectionRequests,
+    });
+  } catch (err) {
+    res.status(400).send("ERROR: " + err.message);
+  }
+});
+
+userRouter.get("/user/connections", userAuth, async (req, res) => {
+  const loggedInUser = req.user;
+
+  try {
+    const acceptedConnectionRequests = await Connection.find({
+      $or: [
+        { fromUserId: loggedInUser?._id, status: "accepted" },
+        { toUserId: loggedInUser?._id, status: "accepted" },
+      ],
+    })
+      .populate("fromUserId", USER_SAFE_FIELDS)
+      .populate("toUserId", USER_SAFE_FIELDS);
+
+    if (!acceptedConnectionRequests) {
+      return res.status(404).send("Connections not found");
+    }
+
+    const data = acceptedConnectionRequests.map((doc) => {
+      if (doc.fromUserId._id.toString() === loggedInUser._id.toString()) {
+        return doc.toUserId;
+      }
+      return doc.fromUserId;
+    });
+
+    res.json({
+      message: "Active connnections fetched successfully",
+      data: data,
+    });
+  } catch (err) {
+    res.status(400).send("ERROR: " + err.message);
+  }
+});
 
 // -----------------------EXAMPLES-----------------------
 

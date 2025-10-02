@@ -15,7 +15,6 @@ const validateSignUpData = (req) => {
 };
 
 const validateUpdateData = (req) => {
-  console.log(req.body);
   const updateAllowedFields = [
     "firstName",
     "lastName",

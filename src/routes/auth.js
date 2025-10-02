@@ -1,6 +1,7 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
 const User = require("../models/user");
+const validator = require("validator");
 const { validateSignUpData } = require("../utils/validation");
 
 const authRouter = express.Router();
@@ -9,9 +10,31 @@ const authRouter = express.Router();
 
 authRouter.post("/signUp", async (req, res) => {
   try {
+    const userEmail = req.body?.emailId;
+
+    if (!userEmail) {
+      return res.status(400).json({
+        message: "Email address is a required field",
+      });
+    }
+
+    if (!validator.isEmail(userEmail)) {
+      return res.status(400).json({
+        message: "Email address is not valid",
+      });
+    }
+
+    const isUserAlreadyInDB = await User.findOne({ emailId: userEmail });
+
+    if (isUserAlreadyInDB) {
+      return res.status(400).json({
+        message: "The email address is already registered in our system",
+        data: userEmail,
+      });
+    }
     // Before writing the user in DB, 2 things needs to be done mandatorily
     // 1. Validation of Data
-    validateSignUpData(req);
+    validateSignUpData(req); // TODO update validation logic for all fields
 
     // 2. Password encryption
     const passwordHash = await bcrypt.hash(req.body?.password, 10);
@@ -39,14 +62,12 @@ authRouter.post("/login", async (req, res) => {
   }
 
   try {
-    const user = await User.findOne({ emailId: emailId });
-
+    const user = await User.findOne({ emailId });
     if (!user) {
       throw new Error("Invalid credentials");
     }
 
     const isPasswordValid = await user.passwordVerify(password); // here the password is user's enteredValue
-
     if (!isPasswordValid) {
       throw new Error("Invalid credentials");
     }

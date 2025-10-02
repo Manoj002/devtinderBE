@@ -126,3 +126,22 @@
 - Create PATCH /profile/edit
 - Create PATCH /profile/edit/password api ---> Not a forgot password case
 - Validate all data in every POST PATCH apis thoroughly
+
+<!-- S2 EP 11 -->
+
+- Create connection request schema
+- Create /request/send POST api
+- Proper validation of data
+- Consider all corner cases
+- $or and $and query, read all ways to query
+- schema.pre()
+- indexes and indexing, why we need it and advantages/disadvantages
+- Compound indexes
+
+<!-- S2 EP 12 -->
+
+- Create POST api for route /request/review/:status/:requestId
+- Thought process and understanding when to use POST/GET
+- ref and populate => understand the working
+- Create GET api for /users/requests/received with all checks and validations
+- Create GET api for /users/connections
