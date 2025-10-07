@@ -4,6 +4,16 @@ const User = require("../models/user");
 const validator = require("validator");
 const { validateSignUpData } = require("../utils/validation");
 
+const USER_SAFE_FIELDS = [
+  "firstName",
+  "lastName",
+  "age",
+  "gender",
+  "photo",
+  "skills",
+  "about",
+];
+
 const authRouter = express.Router();
 
 // -------------------------------------SIGNUP-------------------------------------
@@ -79,7 +89,7 @@ authRouter.post("/login", async (req, res) => {
     // Add the token to cookie and send it back to user
 
     res.cookie("token", jwtToken, { expires: new Date(Date.now() + 900000) });
-    res.send("Login successful!!!");
+    res.send(user);
   } catch (err) {
     res.status(400).send("ERROR: login failed, " + err.message);
   }
@@ -92,7 +102,7 @@ authRouter.post("/login", async (req, res) => {
 authRouter.post("/logout", (req, res) => {
   res
     .cookie("token", null, {
-      expires: new Date(Date.now() + 0),
+      expires: new Date(Date.now()),
     })
     .send("You've been logged out");
 });

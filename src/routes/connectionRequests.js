@@ -80,15 +80,11 @@ connectionRouter.post(
         });
       }
 
-      console.log({ requestId, userId });
-
       const requestConnection = await Connection.findOne({
         _id: requestId,
         toUserId: userId,
         status: "interested",
       });
-
-      console.log({ requestConnection });
 
       if (!requestConnection) {
         return res.status(404).json({

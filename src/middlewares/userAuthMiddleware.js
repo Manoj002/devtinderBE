@@ -5,7 +5,11 @@ const userAuth = async (req, res, next) => {
   const { token } = req.cookies;
 
   try {
-    if (!token) throw new Error("Token is not valid");
+    if (!token) {
+      return res
+        .status(401)
+        .send("Unauthorized access to account, please login");
+    }
 
     const decodedObj = jwt.verify(token, "SECRET_KEY@USER_LOGIN");
 
@@ -18,7 +22,7 @@ const userAuth = async (req, res, next) => {
     req.user = user; // If user is present, attach user to request body, so that in next middleware, user is available
     next(); // calling next middleware / route handler
   } catch (err) {
-    res.status(400).send("User auth failed ", +err.message);
+    res.status(400).send("Auth failure: ", +err.message);
   }
 };
 

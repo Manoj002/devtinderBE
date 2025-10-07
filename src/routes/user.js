@@ -1,5 +1,6 @@
 const express = require("express");
 const Connection = require("../models/connection");
+const User = require("../models/user");
 const { userAuth } = require("../middlewares/userAuthMiddleware");
 
 const USER_SAFE_FIELDS = [
@@ -85,6 +86,45 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
     res.json({
       message: "Active connnections fetched successfully",
       data: data,
+    });
+  } catch (err) {
+    res.status(400).send("ERROR: " + err.message);
+  }
+});
+
+userRouter.get("/user/feed", userAuth, async (req, res) => {
+  try {
+    const loggedInUser = req.user;
+
+    const page = req.query?.page || 1;
+    const limit = req.query?.limit;
+
+    const skip = (page - 1) * limit;
+
+    const existingConnections = await Connection.find({
+      $or: [{ fromUserId: loggedInUser._id }, { toUserId: loggedInUser._id }],
+    }).select("fromUserId toUserId");
+
+    const hideConnectionsFromFeed = new Set();
+
+    existingConnections.forEach((doc) => {
+      hideConnectionsFromFeed.add(doc.fromUserId.toString());
+      hideConnectionsFromFeed.add(doc.toUserId.toString());
+    });
+
+    const feedList = await User.find({
+      $and: [
+        { _id: { $nin: Array.from(hideConnectionsFromFeed) } },
+        { _id: { $ne: loggedInUser._id } },
+      ],
+    })
+      .select(USER_SAFE_FIELDS)
+      .skip(skip)
+      .limit(limit);
+
+    res.json({
+      message: "New users available",
+      data: feedList,
     });
   } catch (err) {
     res.status(400).send("ERROR: " + err.message);

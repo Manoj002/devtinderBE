@@ -145,3 +145,10 @@
 - ref and populate => understand the working
 - Create GET api for /users/requests/received with all checks and validations
 - Create GET api for /users/connections
+
+<!-- S2 EP 13 -->
+
+- Create GET /feed api
+- Explore, all the query operators in mongo, $or, $and, $nin, $ne, other types of operators
+- chanining functions on DB operations
+- Explore skip and limit for pagination

@@ -1,6 +1,7 @@
 const express = require("express");
 const connectDB = require("./config/database");
 const cookieParser = require("cookie-parser");
+const cors = require("cors");
 
 const app = express();
 // Parses the JSON to JS object
@@ -8,6 +9,13 @@ app.use(express.json());
 
 // Parses the cookie, so it is readable by code
 app.use(cookieParser());
+
+app.use(
+  cors({
+    origin: "http://localhost:5173", // whitelisting this url for cross origin
+    credentials: true, // authorization using cookies
+  })
+);
 
 const authRouter = require("./routes/auth");
 const profileRouter = require("./routes/profile");
